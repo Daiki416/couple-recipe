@@ -58,7 +58,7 @@ function parseAuthForm(
 
 /**
  * メール+パスワードでログインする Server Action。
- * 失敗時はエラー文字列を return、成功時は / へ redirect。
+ * 失敗時はエラー文字列を return、成功時は /recipes へ redirect。
  */
 export async function login(
   _prevState: AuthState,
@@ -82,7 +82,7 @@ export async function login(
   }
 
   // redirect は内部で例外を投げるため try/catch の外で呼ぶ。
-  redirect("/");
+  redirect("/recipes");
 }
 
 /**

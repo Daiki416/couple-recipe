@@ -212,6 +212,7 @@ export type Database = {
       recipes: {
         Row: {
           cooked_count: number
+          cooking_time_minutes: number | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -227,6 +228,7 @@ export type Database = {
         }
         Insert: {
           cooked_count?: number
+          cooking_time_minutes?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -242,6 +244,7 @@ export type Database = {
         }
         Update: {
           cooked_count?: number
+          cooking_time_minutes?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -318,6 +321,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_recipe: {
+        Args: {
+          p_ingredients: Json
+          p_recipe: Json
+          p_steps: Json
+          p_tags: Json
+        }
+        Returns: string
+      }
       current_household_id: { Args: never; Returns: string }
       gen_invite_code: { Args: never; Returns: string }
       join_household_by_invite: {
@@ -336,8 +348,37 @@ export type Database = {
         }
       }
       recipe_in_current_household: { Args: { rid: string }; Returns: boolean }
+      search_recipes: {
+        Args: {
+          p_favorite?: boolean
+          p_max_time?: number
+          p_min_rating?: number
+          p_q?: string
+          p_tags?: string[]
+        }
+        Returns: {
+          cooking_time_minutes: number
+          id: string
+          is_favorite: boolean
+          rating: number
+          servings: number
+          tags: string[]
+          title: string
+          updated_at: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      update_recipe: {
+        Args: {
+          p_id: string
+          p_ingredients: Json
+          p_recipe: Json
+          p_steps: Json
+          p_tags: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
