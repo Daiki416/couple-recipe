@@ -28,6 +28,16 @@ export default async function RecipesPage({
   const { data: tg } = await supabase.from("tags").select("name");
   const tagSuggestions = (tg ?? []).map((r) => r.name);
 
+  // キーワード欄のサジェスト（自世帯のレシピ名＋食材名、重複除去）
+  const { data: titleRows } = await supabase.from("recipes").select("title");
+  const { data: ingRows } = await supabase.from("ingredients").select("name");
+  const keywordSuggestions = [
+    ...new Set([
+      ...(titleRows ?? []).map((r) => r.title),
+      ...(ingRows ?? []).map((r) => r.name),
+    ]),
+  ].slice(0, 500);
+
   const hasActiveFilter =
     filters.q !== null || filters.maxTime !== null || filters.tags.length > 0;
 
@@ -43,7 +53,11 @@ export default async function RecipesPage({
         </Link>
       </div>
 
-      <RecipeFilter tagSuggestions={tagSuggestions} current={filters} />
+      <RecipeFilter
+        tagSuggestions={tagSuggestions}
+        keywordSuggestions={keywordSuggestions}
+        current={filters}
+      />
 
       {error ? (
         <p className="rounded-md border border-dashed border-red-300 px-4 py-12 text-center text-sm text-red-600 dark:border-red-800 dark:text-red-400">
