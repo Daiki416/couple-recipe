@@ -14,23 +14,30 @@ export default async function RecipesPage({
   const supabase = await createClient();
   // gen types の Args は optional（未指定 = SQL の default null）。
   // 未指定にしたい値は undefined を渡してキー自体を省略する。
-  const { data: recipes, error } = await supabase.rpc("search_recipes", {
-    p_q: filters.q ?? undefined,
-    p_max_time: filters.maxTime ?? undefined,
-    p_tags: filters.tags.length ? filters.tags : undefined,
-  });
+  const [
+    { data: recipes, error },
+    { data: tg },
+    { data: titleRows },
+    { data: ingRows },
+  ] = await Promise.all([
+    supabase.rpc("search_recipes", {
+      p_q: filters.q ?? undefined,
+      p_max_time: filters.maxTime ?? undefined,
+      p_tags: filters.tags.length ? filters.tags : undefined,
+    }),
+    supabase.from("tags").select("name"),
+    supabase.from("recipes").select("title"),
+    supabase.from("ingredients").select("name"),
+  ]);
 
   // エラーを握り潰すと障害が「0件」に化けて気づけないため、明示的に分岐する。
   if (error) {
     console.error("[RecipesPage] search_recipes", error);
   }
 
-  const { data: tg } = await supabase.from("tags").select("name");
   const tagSuggestions = (tg ?? []).map((r) => r.name);
 
   // キーワード欄のサジェスト（自世帯のレシピ名＋食材名、重複除去）
-  const { data: titleRows } = await supabase.from("recipes").select("title");
-  const { data: ingRows } = await supabase.from("ingredients").select("name");
   const keywordSuggestions = [
     ...new Set([
       ...(titleRows ?? []).map((r) => r.title),
