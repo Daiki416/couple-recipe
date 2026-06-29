@@ -1,5 +1,5 @@
 import { createRecipe } from "@/app/(app)/recipes/actions";
-import { RecipeForm } from "@/components/recipes/RecipeForm";
+import { NewRecipeWorkspace } from "@/components/recipes/NewRecipeWorkspace";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function NewRecipePage() {
@@ -18,7 +18,7 @@ export default async function NewRecipePage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-round text-2xl font-bold text-ink">レシピを作成</h1>
       </div>
-      <RecipeForm
+      <NewRecipeWorkspace
         action={createRecipe}
         ingredientSuggestions={ingredientSuggestions}
         tagSuggestions={tagSuggestions}
