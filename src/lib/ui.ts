@@ -14,7 +14,7 @@ export const outlineButtonClass =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-paper px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-cream-2";
 
 export const subButtonClass =
-  "inline-flex items-center justify-center rounded-lg border-2 border-line px-3 py-1.5 text-sm font-bold text-ink-soft transition-colors hover:border-ink hover:text-ink";
+  "inline-flex items-center justify-center rounded-lg border-2 border-line px-3 py-1.5 text-sm font-bold text-ink-soft transition-colors hover:border-ink hover:text-ink whitespace-nowrap shrink-0";
 
 export const dangerButtonClass =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-tomato px-4 py-2 text-sm font-bold text-tomato transition-colors hover:bg-tomato hover:text-white disabled:opacity-60";

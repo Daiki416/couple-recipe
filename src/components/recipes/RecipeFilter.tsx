@@ -58,7 +58,7 @@ export function RecipeFilter({
           <label htmlFor="q" className={labelClass}>
             キーワード（レシピ名・食材名）
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <input
               id="q"
               type="text"
@@ -66,9 +66,9 @@ export function RecipeFilter({
               maxLength={100}
               list="keyword-suggestions"
               defaultValue={current.q ?? ""}
-              className={`${inputClass} flex-1`}
+              className={`${inputClass} w-full`}
             />
-            <button type="submit" className={primaryButtonClass}>
+            <button type="submit" className={`${primaryButtonClass} self-start`}>
               検索
             </button>
           </div>
