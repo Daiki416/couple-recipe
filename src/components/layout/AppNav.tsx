@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/layout/Logo";
 
 type NavItem = {
   href: string;
@@ -27,11 +28,9 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 const baseLinkClassName =
-  "rounded-md px-3 py-2 text-sm font-medium transition-colors";
-const activeClassName =
-  "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900";
-const inactiveClassName =
-  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800";
+  "rounded-lg px-3 py-2 text-sm font-bold transition-colors";
+const activeClassName = "bg-tomato text-white";
+const inactiveClassName = "text-ink-soft hover:bg-cream-2";
 
 export function AppNav() {
   const pathname = usePathname();
@@ -39,7 +38,8 @@ export function AppNav() {
   return (
     <>
       {/* PC: 左サイドバー */}
-      <nav className="hidden w-56 shrink-0 border-r border-zinc-200 px-3 py-6 md:flex md:flex-col md:gap-1 dark:border-zinc-800">
+      <nav className="hidden w-56 shrink-0 border-r-2 border-line px-3 py-6 md:flex md:flex-col md:gap-1">
+        <Logo className="mb-4 px-3 text-lg" />
         {navItems.map((item) => (
           <Link
             key={item.href}
@@ -55,16 +55,14 @@ export function AppNav() {
       </nav>
 
       {/* スマホ: 下部タブバー */}
-      <nav className="fixed bottom-0 left-0 right-0 z-10 flex border-t border-zinc-200 bg-white md:hidden dark:border-zinc-800 dark:bg-zinc-950">
+      <nav className="fixed bottom-0 left-0 right-0 z-10 flex border-t-2 border-line bg-paper md:hidden">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             aria-current={isActive(pathname, item.href) ? "page" : undefined}
-            className={`flex flex-1 items-center justify-center py-3 text-sm font-medium transition-colors ${
-              isActive(pathname, item.href)
-                ? "text-zinc-900 dark:text-zinc-100"
-                : "text-zinc-500 dark:text-zinc-400"
+            className={`flex flex-1 items-center justify-center py-3 text-sm font-bold transition-colors ${
+              isActive(pathname, item.href) ? "text-tomato" : "text-ink-soft"
             }`}
           >
             {item.label}

@@ -2,6 +2,12 @@
 
 import { useActionState, useState } from "react";
 import type { RecipeFormState } from "@/app/(app)/recipes/actions";
+import {
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+  subButtonClass,
+} from "@/lib/ui";
 
 /** 作成/編集フォームの初期値。編集時に既存レシピから組み立てて渡す。 */
 export type RecipeFormValues = {
@@ -26,11 +32,9 @@ type RecipeFormProps = {
   tagSuggestions?: string[];
 };
 
-const inputClassName =
-  "rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900";
+const inputClassName = inputClass;
 
-const subButtonClassName =
-  "rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800";
+const subButtonClassName = subButtonClass;
 
 export function RecipeForm({
   action,
@@ -68,7 +72,7 @@ export function RecipeForm({
 
       {/* タイトル */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="title" className="text-sm font-medium">
+        <label htmlFor="title" className={labelClass}>
           タイトル
         </label>
         <input
@@ -84,7 +88,7 @@ export function RecipeForm({
 
       {/* 説明 */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="text-sm font-medium">
+        <label htmlFor="description" className={labelClass}>
           説明
         </label>
         <textarea
@@ -99,7 +103,7 @@ export function RecipeForm({
 
       {/* 出典 URL */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="source_url" className="text-sm font-medium">
+        <label htmlFor="source_url" className={labelClass}>
           出典 URL
         </label>
         <input
@@ -115,7 +119,7 @@ export function RecipeForm({
       {/* 人数 / 調理時間 */}
       <div className="flex flex-wrap gap-6">
         <div className="flex flex-col gap-1">
-          <label htmlFor="servings" className="text-sm font-medium">
+          <label htmlFor="servings" className={labelClass}>
             人数
           </label>
           <input
@@ -130,7 +134,7 @@ export function RecipeForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="cooking_time_minutes" className="text-sm font-medium">
+          <label htmlFor="cooking_time_minutes" className={labelClass}>
             調理時間(分)
           </label>
           <input
@@ -147,7 +151,7 @@ export function RecipeForm({
 
       {/* 材料 */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium">材料</legend>
+        <legend className={labelClass}>材料</legend>
         {ingredients.map((ingredient, index) => (
           <div key={index} className="flex gap-2">
             <input
@@ -218,10 +222,12 @@ export function RecipeForm({
 
       {/* 手順 */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium">手順</legend>
+        <legend className={labelClass}>手順</legend>
         {steps.map((step, index) => (
           <div key={index} className="flex gap-2">
-            <span className="pt-2 text-sm text-zinc-500">{index + 1}.</span>
+            <span className="pt-2 text-sm font-bold text-ink-soft">
+              {index + 1}.
+            </span>
             <textarea
               name="step_body"
               rows={2}
@@ -266,7 +272,7 @@ export function RecipeForm({
 
       {/* タグ */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium">タグ</legend>
+        <legend className={labelClass}>タグ</legend>
         {tags.map((tag, index) => (
           <div key={index} className="flex gap-2">
             <input
@@ -315,16 +321,12 @@ export function RecipeForm({
       </datalist>
 
       {state?.error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm font-bold text-tomato" role="alert">
           {state.error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
+      <button type="submit" disabled={pending} className={primaryButtonClass}>
         {pending ? "保存中..." : recipeId ? "更新する" : "作成する"}
       </button>
     </form>

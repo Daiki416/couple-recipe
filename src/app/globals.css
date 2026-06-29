@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-cream: #fbf3de;
+  --color-cream-2: #f3e7c9;
+  --color-paper: #fffcf4;
+  --color-ink: #2e2a26;
+  --color-ink-soft: #6f655a;
+  --color-tomato: #e4572e;
+  --color-tomato-deep: #c7431e;
+  --color-mustard: #c9a227;
+  --color-line: #e2d4ae;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "Zen Kaku Gothic New", system-ui, sans-serif;
+  --font-display: "Reggae One", system-ui, sans-serif;
+  --font-round: "Zen Maru Gothic", system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* 赤白チェック（ギンガム）。白地に 2 方向の縞を重ねて格子にする。 */
+.gingham {
+  background-color: #fff;
+  background-image:
+    repeating-linear-gradient(
+      rgba(228, 87, 46, 0.55) 0 6px,
+      transparent 6px 12px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(228, 87, 46, 0.55) 0 6px,
+      transparent 6px 12px
+    );
+  background-size: 12px 12px;
+}
+
+/* おしながきの点線リーダー（料理名と価格/時間の間を点で繋ぐ）。 */
+.menu-leader {
+  flex: 1 1 auto;
+  align-self: flex-end;
+  margin-bottom: 0.4rem;
+  border-bottom: 2px dotted rgba(46, 42, 38, 0.3);
 }

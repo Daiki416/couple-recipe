@@ -13,10 +13,13 @@ export const SEARCH_MAX_TIME_MAX = 1440;
 export const TAG_NAME_MAX = 30;
 export const TAG_FILTER_MAX = 20;
 
+export type SortKey = "default" | "kana" | "time";
+
 export type SearchFilters = {
   q: string | null;
   maxTime: number | null;
   tags: string[];
+  sort: SortKey;
 };
 
 type RawSearchParams = { [key: string]: string | string[] | undefined };
@@ -120,5 +123,44 @@ export function parseSearchParams(sp: RawSearchParams): SearchFilters {
     }
   }
 
-  return { q, maxTime, tags };
+  // sort: 許可値のみ採用。空/不正は "default"（サーバの updated_at desc 維持）。
+  const rawSort = firstValue(sp.sort);
+  const sort: SortKey =
+    rawSort === "kana" || rawSort === "time" ? rawSort : "default";
+
+  return { q, maxTime, tags, sort };
+}
+
+/**
+ * 取得済みのレシピ配列を指定キーで並び替える純粋関数（非破壊）。
+ * - default: そのまま返す（サーバの updated_at desc を維持）。
+ * - kana: 料理名の五十音順（localeCompare "ja"）。
+ * - time: 調理時間の昇順。null は末尾。同値は料理名でタイブレーク。
+ */
+export function sortRecipes<
+  T extends { title: string; cooking_time_minutes: number | null },
+>(rows: T[], sort: SortKey): T[] {
+  if (sort === "kana") {
+    return [...rows].sort((a, b) => a.title.localeCompare(b.title, "ja"));
+  }
+  if (sort === "time") {
+    return [...rows].sort((a, b) => {
+      const at = a.cooking_time_minutes;
+      const bt = b.cooking_time_minutes;
+      if (at === null && bt === null) {
+        return a.title.localeCompare(b.title, "ja");
+      }
+      if (at === null) {
+        return 1;
+      }
+      if (bt === null) {
+        return -1;
+      }
+      if (at !== bt) {
+        return at - bt;
+      }
+      return a.title.localeCompare(b.title, "ja");
+    });
+  }
+  return rows;
 }

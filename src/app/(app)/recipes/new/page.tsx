@@ -16,7 +16,7 @@ export default async function NewRecipePage() {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">レシピを作成</h1>
+        <h1 className="font-round text-2xl font-bold text-ink">レシピを作成</h1>
       </div>
       <RecipeForm
         action={createRecipe}

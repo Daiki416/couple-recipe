@@ -57,10 +57,10 @@ export default async function EditRecipePage({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">レシピを編集</h1>
+        <h1 className="font-round text-2xl font-bold text-ink">レシピを編集</h1>
         <Link
           href={`/recipes/${recipe.id}`}
-          className="text-sm font-medium underline text-zinc-600 dark:text-zinc-400"
+          className="text-sm font-bold text-tomato"
         >
           詳細へ戻る
         </Link>

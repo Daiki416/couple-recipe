@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { signup, type AuthState } from "@/app/(auth)/actions";
+import { inputClass, labelClass, primaryButtonClass } from "@/lib/ui";
 
 export function SignupForm() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
@@ -12,7 +13,7 @@ export function SignupForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <label htmlFor="display_name" className="text-sm font-medium">
+        <label htmlFor="display_name" className={labelClass}>
           表示名
         </label>
         <input
@@ -21,12 +22,12 @@ export function SignupForm() {
           type="text"
           autoComplete="nickname"
           required
-          className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputClass}
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className={labelClass}>
           メールアドレス
         </label>
         <input
@@ -35,12 +36,12 @@ export function SignupForm() {
           type="email"
           autoComplete="email"
           required
-          className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputClass}
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className={labelClass}>
           パスワード
         </label>
         <input
@@ -49,21 +50,17 @@ export function SignupForm() {
           type="password"
           autoComplete="new-password"
           required
-          className="rounded-md border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputClass}
         />
       </div>
 
       {state?.error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm font-bold text-tomato" role="alert">
           {state.error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
+      <button type="submit" disabled={pending} className={primaryButtonClass}>
         {pending ? "登録中..." : "アカウント作成"}
       </button>
     </form>

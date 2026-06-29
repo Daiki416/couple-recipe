@@ -27,7 +27,7 @@ $ARGUMENTS
 1. `mcp__codex-review__review_current_diff` を実行する（旧 `reviewer` サブエージェントは使わない）
    - `repo_path`: リポジトリのルート（このプロジェクトでは `/Users/daikisaito/dev/recipe_mng`）
    - `doc_paths`: 正確性レビューのため関連ドキュメントを渡す（例 `["CLAUDE.md", "docs/architecture.md", "docs/database.md", "docs/project.md"]`）
-   - Codex が自分で git diff を取得するため、Claude 側で diff 本文を渡さない（トークン節約）
+   - MCPサーバーでgit diff を取得するため、Claude 側で diff 本文を渡さない（トークン節約）
    - ユーザーから「プロジェクト全体をレビュー」等の明確な指示があるときのみ `mcp__codex-review__review_whole_project` を使う
 2. `reviewer-validator` を実行し、codex-review の指摘を精査させる（維持・降格・却下／重要度調整）
    - 入力: codex-review の出力（指摘一覧）＋変更ファイル一覧・実装概要

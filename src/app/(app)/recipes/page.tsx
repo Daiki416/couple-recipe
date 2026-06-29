@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { parseSearchParams } from "@/app/(app)/recipes/searchParams";
+import {
+  parseSearchParams,
+  sortRecipes,
+} from "@/app/(app)/recipes/searchParams";
 import { RecipeFilter } from "@/components/recipes/RecipeFilter";
+import { cardClass, pillClass, primaryButtonClass } from "@/lib/ui";
 
 export default async function RecipesPage({
   searchParams,
@@ -35,6 +39,9 @@ export default async function RecipesPage({
     console.error("[RecipesPage] search_recipes", error);
   }
 
+  // クライアント指定の並び替えを適用（非破壊。default はサーバ順を維持）。
+  const sorted = recipes ? sortRecipes(recipes, filters.sort) : recipes;
+
   const tagSuggestions = (tg ?? []).map((r) => r.name);
 
   // キーワード欄のサジェスト（自世帯のレシピ名＋食材名、重複除去）
@@ -51,11 +58,8 @@ export default async function RecipesPage({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">レシピ一覧</h1>
-        <Link
-          href="/recipes/new"
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <h1 className="font-round text-2xl font-bold text-ink">レシピ一覧</h1>
+        <Link href="/recipes/new" className={primaryButtonClass}>
           新規作成
         </Link>
       </div>
@@ -67,43 +71,43 @@ export default async function RecipesPage({
       />
 
       {error ? (
-        <p className="rounded-md border border-dashed border-red-300 px-4 py-12 text-center text-sm text-red-600 dark:border-red-800 dark:text-red-400">
+        <p className="rounded-xl border-2 border-dashed border-line bg-paper/60 px-4 py-12 text-center text-tomato">
           レシピの取得に失敗しました。時間をおいて再度お試しください。
         </p>
-      ) : !recipes || recipes.length === 0 ? (
-        <p className="rounded-md border border-dashed border-zinc-300 px-4 py-12 text-center text-sm text-zinc-500 dark:border-zinc-700">
+      ) : !sorted || sorted.length === 0 ? (
+        <p className="rounded-xl border-2 border-dashed border-line bg-paper/60 px-4 py-12 text-center text-ink-soft">
           {hasActiveFilter
             ? "条件に一致するレシピがありません。"
-            : "まだレシピがありません。「新規作成」から追加してください。"}
+            : "まだレシピがありません。右上の『新規作成』から、ふたりの一品を追加しましょう。"}
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {recipes.map((recipe) => (
-            <li
-              key={recipe.id}
-              className="flex flex-col gap-2 rounded-md border border-zinc-200 px-4 py-3 dark:border-zinc-800"
-            >
+        <ul className={`${cardClass} divide-y-2 divide-line`}>
+          {sorted.map((recipe) => (
+            <li key={recipe.id} className="px-4 py-3">
               <Link
                 href={`/recipes/${recipe.id}`}
-                className="flex items-center justify-between gap-3 transition-opacity hover:opacity-70"
+                className="group flex items-baseline gap-2"
               >
-                <span className="font-medium">{recipe.title}</span>
-                <span className="flex items-center gap-3 text-sm text-zinc-500">
-                  {recipe.servings !== null && (
-                    <span>{recipe.servings}人前</span>
-                  )}
-                  {recipe.cooking_time_minutes !== null && (
-                    <span>{recipe.cooking_time_minutes}分</span>
-                  )}
+                <span className="min-w-0 font-round font-bold transition-colors group-hover:text-tomato">
+                  {recipe.title}
                 </span>
+                {recipe.cooking_time_minutes !== null && (
+                  <>
+                    <span className="menu-leader" aria-hidden />
+                    <span className="shrink-0 font-bold text-mustard">
+                      {recipe.cooking_time_minutes}
+                      <span className="text-xs">分</span>
+                    </span>
+                  </>
+                )}
               </Link>
               {recipe.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   {recipe.tags.map((name) => (
                     <Link
                       key={name}
                       href={`/recipes?tag=${encodeURIComponent(name)}`}
-                      className="rounded-full border border-zinc-300 px-2 py-0.5 text-xs text-zinc-500 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                      className={pillClass}
                     >
                       {name}
                     </Link>

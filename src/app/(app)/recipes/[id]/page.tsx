@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteRecipeButton } from "@/components/recipes/DeleteRecipeButton";
+import { outlineButtonClass, pillClass } from "@/lib/ui";
 
 /**
  * href として安全に描画できる URL のみを返す（多層防御）。
@@ -46,13 +47,13 @@ export default async function RecipeDetailPage({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
       <div className="mb-6 flex items-start justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-round text-2xl font-bold text-ink">
           {recipe.title}
         </h1>
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href={`/recipes/${recipe.id}/edit`}
-            className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className={outlineButtonClass}
           >
             編集
           </Link>
@@ -60,7 +61,7 @@ export default async function RecipeDetailPage({
         </div>
       </div>
 
-      <dl className="mb-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <dl className="mb-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-ink-soft">
         {recipe.servings !== null && (
           <div className="flex gap-2">
             <dt>人数</dt>
@@ -81,7 +82,7 @@ export default async function RecipeDetailPage({
                 href={sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
+                className="text-tomato underline"
               >
                 リンク
               </a>
@@ -96,7 +97,7 @@ export default async function RecipeDetailPage({
             <li key={name}>
               <Link
                 href={`/recipes?tag=${encodeURIComponent(name)}`}
-                className="inline-block rounded-full border border-zinc-300 px-2 py-0.5 text-xs text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                className={`inline-block ${pillClass}`}
               >
                 {name}
               </Link>
@@ -112,19 +113,19 @@ export default async function RecipeDetailPage({
       )}
 
       <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold">材料</h2>
+        <h2 className="mb-2 font-round text-lg font-bold text-ink">材料</h2>
         {recipe.ingredients.length === 0 ? (
-          <p className="text-sm text-zinc-500">登録されていません。</p>
+          <p className="text-sm text-ink-soft">登録されていません。</p>
         ) : (
           <ul className="flex flex-col gap-1">
             {recipe.ingredients.map((ingredient) => (
               <li
                 key={ingredient.id}
-                className="flex justify-between border-b border-zinc-100 py-1 dark:border-zinc-800"
+                className="flex justify-between border-b border-line py-1"
               >
                 <span>{ingredient.name}</span>
                 {ingredient.quantity && (
-                  <span className="text-zinc-500">{ingredient.quantity}</span>
+                  <span className="text-ink-soft">{ingredient.quantity}</span>
                 )}
               </li>
             ))}
@@ -133,14 +134,14 @@ export default async function RecipeDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-semibold">手順</h2>
+        <h2 className="mb-2 font-round text-lg font-bold text-ink">手順</h2>
         {recipe.recipe_steps.length === 0 ? (
-          <p className="text-sm text-zinc-500">登録されていません。</p>
+          <p className="text-sm text-ink-soft">登録されていません。</p>
         ) : (
           <ol className="flex flex-col gap-3">
             {recipe.recipe_steps.map((step, index) => (
               <li key={step.id} className="flex gap-3">
-                <span className="shrink-0 font-semibold text-zinc-500">
+                <span className="shrink-0 font-bold text-ink-soft">
                   {index + 1}.
                 </span>
                 <span className="whitespace-pre-wrap">{step.body}</span>
