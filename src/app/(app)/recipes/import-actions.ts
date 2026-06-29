@@ -7,10 +7,13 @@ import {
   clampText,
   compactIngredients,
   compactSteps,
-  compactTags,
   LIMITS,
 } from "@/lib/recipe-import/parsers";
-import type { ImportedRecipe, ImportResult } from "@/lib/recipe-import/types";
+import {
+  RecipeImportError,
+  type ImportedRecipe,
+  type ImportResult,
+} from "@/lib/recipe-import/types";
 import type { RecipeFormValues } from "@/components/recipes/RecipeForm";
 
 /** 任意整数を許容範囲でクランプした文字列にする。空/範囲外は空文字。 */
@@ -29,7 +32,6 @@ function clampNumberField(
 function toFormValues(imported: ImportedRecipe, sourceUrl: string): RecipeFormValues {
   const ingredients = compactIngredients(imported.ingredients);
   const steps = compactSteps(imported.steps);
-  const tags = compactTags(imported.tags ?? []);
 
   return {
     title: imported.title ? clampText(imported.title, LIMITS.TITLE) : "",
@@ -42,7 +44,8 @@ function toFormValues(imported: ImportedRecipe, sourceUrl: string): RecipeFormVa
     ingredients:
       ingredients.length > 0 ? ingredients : [{ name: "", quantity: "" }],
     steps: steps.length > 0 ? steps : [{ body: "" }],
-    tags: tags.length > 0 ? tags : [""],
+    // 取り込み元のタグはフォームへ反映しない（常に空 1 行）。
+    tags: [""],
   };
 }
 
@@ -92,7 +95,10 @@ export async function importRecipeFromUrl(rawUrl: string): Promise<ImportResult>
     console.error("[importRecipeFromUrl]", error);
     return {
       ok: false,
-      error: "ページを取得できませんでした。URL を確認してください。",
+      error:
+        error instanceof RecipeImportError
+          ? error.userMessage
+          : "ページを取得できませんでした。URL を確認してください。",
     };
   }
 

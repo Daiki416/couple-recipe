@@ -6,9 +6,9 @@ export const labelClass = "text-sm font-bold text-ink";
 export const inputClass =
   "rounded-lg border-2 border-line bg-paper px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-soft/60 focus:border-tomato focus-visible:border-tomato";
 
-// ホーロー看板風のプライマリボタン（影付き・押下で沈む）。
+// ホーロー看板風のプライマリボタン（影なし・色トランジションのみ）。
 export const primaryButtonClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-tomato px-4 py-2 text-sm font-bold text-white shadow-[2px_2px_0_0_var(--color-ink)] transition-all hover:bg-tomato-deep active:translate-x-[1px] active:translate-y-[1px] active:shadow-none disabled:opacity-60";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-tomato px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-tomato-deep disabled:opacity-60";
 
 export const outlineButtonClass =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-paper px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-cream-2";

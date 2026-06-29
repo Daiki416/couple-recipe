@@ -26,3 +26,17 @@ export type ImportedRecipe = {
 export type ImportResult =
   | { ok: true; data: RecipeFormValues; imageUrl?: string; warning?: string }
   | { ok: false; error: string };
+
+/**
+ * 取り込み失敗時に、ユーザー向けの安全な文言（{@link userMessage}）を
+ * 添えて投げるエラー。生のキーや外部 API の生メッセージは含めない。
+ */
+export class RecipeImportError extends Error {
+  constructor(
+    public readonly userMessage: string,
+    message?: string,
+  ) {
+    super(message ?? userMessage);
+    this.name = "RecipeImportError";
+  }
+}

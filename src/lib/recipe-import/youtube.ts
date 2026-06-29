@@ -1,12 +1,13 @@
 import "server-only";
-import type { ImportedRecipe } from "./types";
+import { RecipeImportError, type ImportedRecipe } from "./types";
 import { clampText, LIMITS, stripHtml } from "./parsers";
 import { parseYoutubeDescription } from "./youtube-parser";
 import { extractVideoId } from "./youtube-url";
 
 /**
  * YouTube Data API v3 を使って概要欄からレシピを取り込む I/O 層。
- * API キーや生レスポンスはクライアントへ返さず、失敗時は素の Error を投げる。
+ * API キーや生レスポンスはクライアントへ返さない。失敗時は RecipeImportError を投げ、
+ * その userMessage を import-actions 側がユーザー向け文言として利用する。
  */
 
 const TIMEOUT_MS = 10_000;
@@ -56,11 +57,17 @@ function extractSnippet(json: unknown): YoutubeSnippet | null {
 export async function fetchYoutubeRecipe(url: string): Promise<ImportedRecipe> {
   const videoId = extractVideoId(url);
   if (!videoId) {
-    throw new Error("invalid youtube url");
+    throw new RecipeImportError(
+      "YouTube の URL を認識できませんでした。",
+      "invalid youtube url",
+    );
   }
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
-    throw new Error("YOUTUBE_API_KEY is not configured");
+    throw new RecipeImportError(
+      "サーバーに YouTube API キーが設定されていません。",
+      "YOUTUBE_API_KEY missing",
+    );
   }
 
   const endpoint = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${encodeURIComponent(
@@ -73,7 +80,10 @@ export async function fetchYoutubeRecipe(url: string): Promise<ImportedRecipe> {
   try {
     const res = await fetch(endpoint, { signal: controller.signal });
     if (!res.ok) {
-      throw new Error(`youtube api error: ${res.status}`);
+      throw new RecipeImportError(
+        `YouTube API がエラーを返しました（${res.status}）。`,
+        `youtube api error: ${res.status}`,
+      );
     }
     json = await res.json();
   } finally {
@@ -82,7 +92,10 @@ export async function fetchYoutubeRecipe(url: string): Promise<ImportedRecipe> {
 
   const snippet = extractSnippet(json);
   if (!snippet) {
-    throw new Error("youtube video not found");
+    throw new RecipeImportError(
+      "動画情報を取得できませんでした。URL をご確認ください。",
+      "youtube video not found",
+    );
   }
 
   const parsed = parseYoutubeDescription(snippet.description ?? "");
