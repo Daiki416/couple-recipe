@@ -154,39 +154,37 @@ export function RecipeForm({
         <legend className={labelClass}>材料</legend>
         {ingredients.map((ingredient, index) => (
           <div key={index} className="flex items-start gap-2">
-            <div className="flex flex-1 flex-col gap-2 min-w-0">
-              <input
-                name="ingredient_name"
-                type="text"
-                placeholder="材料名"
-                list="ingredient-suggestions"
-                maxLength={100}
-                value={ingredient.name}
-                onChange={(e) =>
-                  setIngredients((prev) =>
-                    prev.map((item, i) =>
-                      i === index ? { ...item, name: e.target.value } : item,
-                    ),
-                  )
-                }
-                className={`${inputClassName} w-full`}
-              />
-              <input
-                name="ingredient_quantity"
-                type="text"
-                placeholder="分量"
-                maxLength={100}
-                value={ingredient.quantity}
-                onChange={(e) =>
-                  setIngredients((prev) =>
-                    prev.map((item, i) =>
-                      i === index ? { ...item, quantity: e.target.value } : item,
-                    ),
-                  )
-                }
-                className={`${inputClassName} w-full`}
-              />
-            </div>
+            <input
+              name="ingredient_name"
+              type="text"
+              placeholder="材料名"
+              list="ingredient-suggestions"
+              maxLength={100}
+              value={ingredient.name}
+              onChange={(e) =>
+                setIngredients((prev) =>
+                  prev.map((item, i) =>
+                    i === index ? { ...item, name: e.target.value } : item,
+                  ),
+                )
+              }
+              className={`${inputClassName} flex-[2] min-w-0`}
+            />
+            <input
+              name="ingredient_quantity"
+              type="text"
+              placeholder="分量"
+              maxLength={100}
+              value={ingredient.quantity}
+              onChange={(e) =>
+                setIngredients((prev) =>
+                  prev.map((item, i) =>
+                    i === index ? { ...item, quantity: e.target.value } : item,
+                  ),
+                )
+              }
+              className={`${inputClassName} flex-1 min-w-0`}
+            />
             <button
               type="button"
               onClick={() =>
@@ -243,7 +241,7 @@ export function RecipeForm({
                   ),
                 )
               }
-              className={`${inputClassName} flex-1`}
+              className={`${inputClassName} flex-1 min-w-0`}
             />
             <button
               type="button"
@@ -289,7 +287,7 @@ export function RecipeForm({
                   prev.map((item, i) => (i === index ? e.target.value : item)),
                 )
               }
-              className={`${inputClassName} flex-1`}
+              className={`${inputClassName} flex-1 min-w-0`}
             />
             <button
               type="button"
