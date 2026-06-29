@@ -65,7 +65,7 @@ export async function fetchYoutubeRecipe(url: string): Promise<ImportedRecipe> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
     throw new RecipeImportError(
-      "サーバーに YouTube API キーが設定されていません。",
+      "YouTube から情報を取得できませんでした。時間をおいて再度お試しください。",
       "YOUTUBE_API_KEY missing",
     );
   }
@@ -81,7 +81,7 @@ export async function fetchYoutubeRecipe(url: string): Promise<ImportedRecipe> {
     const res = await fetch(endpoint, { signal: controller.signal });
     if (!res.ok) {
       throw new RecipeImportError(
-        `YouTube API がエラーを返しました（${res.status}）。`,
+        "YouTube から情報を取得できませんでした。時間をおいて再度お試しください。",
         `youtube api error: ${res.status}`,
       );
     }
