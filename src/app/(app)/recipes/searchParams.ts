@@ -2,6 +2,8 @@
 // I/O を持たず、不正値はエラーにせず未指定扱いへフォールバックする（throw しない）。
 // 検証作法は actions.ts に合わせる（codePointLength / 制御文字判定 / 整数 parse）。
 
+import { codePointLength, hasControlChar } from "@/lib/validation/text";
+
 // キーワードの最大長（コードポイント単位）
 export const SEARCH_Q_MAX = 100;
 
@@ -23,22 +25,6 @@ export type SearchFilters = {
 };
 
 type RawSearchParams = { [key: string]: string | string[] | undefined };
-
-/**
- * 制御文字を含むかどうかを判定する。
- * C0 制御文字(0x00-0x1F) / DEL(0x7f) / C1 制御文字(0x80-0x9F) を対象とする。
- */
-function hasControlChar(value: string): boolean {
-  return [...value].some((ch) => {
-    const code = ch.codePointAt(0) ?? 0;
-    return code <= 0x1f || code === 0x7f || (code >= 0x80 && code <= 0x9f);
-  });
-}
-
-/** コードポイント数を返す（サロゲートペアを 1 文字として数える）。 */
-function codePointLength(value: string): number {
-  return [...value].length;
-}
 
 /** searchParams から単一の文字列値を取り出す（配列なら先頭を採用）。 */
 function firstValue(raw: string | string[] | undefined): string | undefined {

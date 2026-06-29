@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { codePointLength, hasControlChar } from "@/lib/validation/text";
 
 export type RecipeFormState = {
   error: string;
@@ -39,29 +40,6 @@ type ParsedRecipe = {
 type ParseRecipeFormResult =
   | { ok: true; data: ParsedRecipe }
   | { ok: false; error: string };
-
-/**
- * 制御文字を含むかどうかを判定する。
- * C0 制御文字(0x00-0x1F) / DEL(0x7f) / C1 制御文字(0x80-0x9F) を対象とする。
- * @param allowNewlineTab true のとき TAB/LF/CR は許可する（複数行テキスト用）
- */
-function hasControlChar(
-  value: string,
-  { allowNewlineTab }: { allowNewlineTab: boolean },
-): boolean {
-  return [...value].some((ch) => {
-    const code = ch.codePointAt(0) ?? 0;
-    if (allowNewlineTab && (code === 0x09 || code === 0x0a || code === 0x0d)) {
-      return false;
-    }
-    return code <= 0x1f || code === 0x7f || (code >= 0x80 && code <= 0x9f);
-  });
-}
-
-/** コードポイント数を返す（サロゲートペアを 1 文字として数える）。 */
-function codePointLength(value: string): number {
-  return [...value].length;
-}
 
 /**
  * 任意整数フィールドの検証。空文字は null、範囲外/非整数は不正とする。

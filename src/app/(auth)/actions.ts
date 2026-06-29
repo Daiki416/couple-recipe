@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { codePointLength, hasControlChar } from "@/lib/validation/text";
 
 export type AuthState = {
   error: string;
@@ -42,13 +43,11 @@ function parseAuthForm(
 
   if (requireDisplayName) {
     // display_name: 必須 + 最大長 50（コードポイント単位） + 制御文字を含む入力は拒否。
-    // C0 制御文字(0x00-0x1F) / DEL(0x7f) / C1 制御文字(0x80-0x9F) のいずれかを含めば NG。
-    const codePoints = [...displayName];
-    const hasControlChar = codePoints.some((ch) => {
-      const code = ch.codePointAt(0) ?? 0;
-      return code <= 0x1f || code === 0x7f || (code >= 0x80 && code <= 0x9f);
-    });
-    if (!displayName || hasControlChar || codePoints.length > 50) {
+    if (
+      !displayName ||
+      hasControlChar(displayName) ||
+      codePointLength(displayName) > 50
+    ) {
       return { ok: false, error: genericError };
     }
   }
