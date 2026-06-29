@@ -6,9 +6,9 @@ export const labelClass = "text-sm font-bold text-ink";
 export const inputClass =
   "rounded-lg border-2 border-line bg-paper px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-soft/60 focus:border-tomato focus-visible:border-tomato";
 
-// ホーロー看板風のプライマリボタン（影なし・色トランジションのみ）。
+// ホーロー看板風のプライマリボタン（影なし・色トランジションのみ）。外枠は中の塗りと同系のオレンジ。
 export const primaryButtonClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-tomato px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-tomato-deep disabled:opacity-60";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-tomato-deep bg-tomato px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-tomato-deep disabled:opacity-60";
 
 export const outlineButtonClass =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-ink bg-paper px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-cream-2";
@@ -26,4 +26,4 @@ export const pillClass =
   "rounded-full border-2 border-line bg-cream-2 px-2.5 py-0.5 text-xs font-bold text-ink-soft transition-colors hover:border-ink hover:text-ink";
 
 export const activePillClass =
-  "rounded-full border-2 border-ink bg-tomato px-2.5 py-0.5 text-xs font-bold text-white transition-colors hover:bg-tomato-deep";
+  "rounded-full border-2 border-tomato-deep bg-tomato px-2.5 py-0.5 text-xs font-bold text-white transition-colors hover:bg-tomato-deep";
