@@ -168,7 +168,7 @@ export function RecipeForm({
                   ),
                 )
               }
-              className={`${inputClassName} flex-[2] min-w-0`}
+              className={`${inputClassName} w-0 min-w-0 grow-[2]`}
             />
             <input
               name="ingredient_quantity"
@@ -183,7 +183,7 @@ export function RecipeForm({
                   ),
                 )
               }
-              className={`${inputClassName} flex-1 min-w-0`}
+              className={`${inputClassName} w-0 min-w-0 grow`}
             />
             <button
               type="button"
@@ -241,7 +241,7 @@ export function RecipeForm({
                   ),
                 )
               }
-              className={`${inputClassName} flex-1 min-w-0`}
+              className={`${inputClassName} w-0 min-w-0 grow`}
             />
             <button
               type="button"
@@ -287,7 +287,7 @@ export function RecipeForm({
                   prev.map((item, i) => (i === index ? e.target.value : item)),
                 )
               }
-              className={`${inputClassName} flex-1 min-w-0`}
+              className={`${inputClassName} w-0 min-w-0 grow`}
             />
             <button
               type="button"

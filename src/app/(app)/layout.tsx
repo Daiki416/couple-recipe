@@ -13,7 +13,9 @@ export default function AppLayout({
         <Logo />
       </header>
       <AppNav />
-      <div className="flex flex-1 flex-col pb-16 md:pb-0">{children}</div>
+      <div className="flex min-w-0 w-full flex-1 flex-col overflow-x-clip pb-16 md:pb-0">
+        {children}
+      </div>
     </div>
   );
 }
