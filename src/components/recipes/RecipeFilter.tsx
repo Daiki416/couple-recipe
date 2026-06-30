@@ -28,6 +28,9 @@ function buildTagToggleHref(current: SearchFilters, tag: string): string {
   if (current.maxTime !== null) {
     params.set("max_time", String(current.maxTime));
   }
+  if (current.cooked !== null) {
+    params.set("cooked", current.cooked ? "yes" : "no");
+  }
   if (current.sort !== "default") {
     params.set("sort", current.sort);
   }
@@ -93,6 +96,28 @@ export function RecipeFilter({
               defaultValue={current.maxTime ?? ""}
               className={`${inputClass} w-32`}
             />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="cooked" className={labelClass}>
+              作ったか
+            </label>
+            <select
+              id="cooked"
+              name="cooked"
+              defaultValue={
+                current.cooked === true
+                  ? "yes"
+                  : current.cooked === false
+                    ? "no"
+                    : ""
+              }
+              className={inputClass + " w-44"}
+            >
+              <option value="">すべて</option>
+              <option value="yes">作ったことある</option>
+              <option value="no">まだ料理してない</option>
+            </select>
           </div>
 
           <div className="flex flex-col gap-1">

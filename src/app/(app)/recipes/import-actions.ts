@@ -43,6 +43,8 @@ function toFormValues(imported: ImportedRecipe, sourceUrl: string): RecipeFormVa
     source_url: clampText(sourceUrl, LIMITS.SOURCE_URL),
     servings: clampNumberField(imported.servings, 1, 99),
     cooking_time_minutes: clampNumberField(imported.cookingTimeMinutes, 1, 1440),
+    // 取り込み時は未調理扱い（常に false）。
+    is_cooked: false,
     ingredients:
       ingredients.length > 0 ? ingredients : [{ name: "", quantity: "" }],
     steps: steps.length > 0 ? steps : [{ body: "" }],

@@ -6,6 +6,7 @@ import {
   sortRecipes,
 } from "@/app/(app)/recipes/searchParams";
 import { RecipeFilter } from "@/components/recipes/RecipeFilter";
+import { CookedToggle } from "@/components/recipes/CookedToggle";
 import { cardClass, pillClass, primaryButtonClass } from "@/lib/ui";
 
 export default async function RecipesPage({
@@ -29,6 +30,7 @@ export default async function RecipesPage({
       p_q: filters.q ?? undefined,
       p_max_time: filters.maxTime ?? undefined,
       p_tags: filters.tags.length ? filters.tags : undefined,
+      p_cooked: filters.cooked ?? undefined,
     }),
     supabase.from("tags").select("name"),
     supabase.from("recipes").select("title"),
@@ -85,7 +87,10 @@ export default async function RecipesPage({
   ].slice(0, 500);
 
   const hasActiveFilter =
-    filters.q !== null || filters.maxTime !== null || filters.tags.length > 0;
+    filters.q !== null ||
+    filters.maxTime !== null ||
+    filters.tags.length > 0 ||
+    filters.cooked !== null;
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
@@ -165,6 +170,12 @@ export default async function RecipesPage({
                       ))}
                     </div>
                   )}
+                </div>
+                <div className="shrink-0 self-center">
+                  <CookedToggle
+                    recipeId={recipe.id}
+                    isCooked={recipe.is_cooked}
+                  />
                 </div>
               </li>
             );

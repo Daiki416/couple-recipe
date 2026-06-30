@@ -18,6 +18,7 @@ export type RecipeFormValues = {
   source_url: string;
   servings: string;
   cooking_time_minutes: string;
+  is_cooked: boolean;
   ingredients: { name: string; quantity: string }[];
   steps: { body: string }[];
   tags: string[];
@@ -162,6 +163,18 @@ export function RecipeForm({
           />
         </div>
       </div>
+
+      {/* 作ったことがある */}
+      <label className="flex items-center gap-2">
+        <input
+          id="is_cooked"
+          name="is_cooked"
+          type="checkbox"
+          defaultChecked={defaultValues?.is_cooked ?? false}
+          className="size-5 accent-tomato"
+        />
+        <span className={labelClass}>作ったことがある</span>
+      </label>
 
       {/* 材料 */}
       <fieldset className="flex flex-col gap-2">

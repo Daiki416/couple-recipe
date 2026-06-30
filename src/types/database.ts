@@ -235,6 +235,7 @@ export type Database = {
           description: string | null
           household_id: string
           id: string
+          is_cooked: boolean
           is_favorite: boolean
           last_cooked_at: string | null
           note: string | null
@@ -252,6 +253,7 @@ export type Database = {
           description?: string | null
           household_id: string
           id?: string
+          is_cooked?: boolean
           is_favorite?: boolean
           last_cooked_at?: string | null
           note?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           description?: string | null
           household_id?: string
           id?: string
+          is_cooked?: boolean
           is_favorite?: boolean
           last_cooked_at?: string | null
           note?: string | null
@@ -370,6 +373,7 @@ export type Database = {
       recipe_in_current_household: { Args: { rid: string }; Returns: boolean }
       search_recipes: {
         Args: {
+          p_cooked?: boolean
           p_favorite?: boolean
           p_max_time?: number
           p_min_rating?: number
@@ -379,6 +383,7 @@ export type Database = {
         Returns: {
           cooking_time_minutes: number
           id: string
+          is_cooked: boolean
           is_favorite: boolean
           rating: number
           servings: number

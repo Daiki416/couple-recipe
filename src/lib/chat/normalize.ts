@@ -130,6 +130,8 @@ export function normalizeDraft(raw: unknown): RecipeFormValues {
     source_url: "",
     servings: clampNumberField(draft.servings, 1, 99),
     cooking_time_minutes: clampNumberField(draft.cooking_time_minutes, 1, 1440),
+    // AI ドラフトは未調理扱い（常に false）。
+    is_cooked: false,
     ingredients:
       ingredients.length > 0 ? ingredients : [{ name: "", quantity: "" }],
     steps: steps.length > 0 ? steps : [{ body: "" }],

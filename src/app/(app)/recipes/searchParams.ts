@@ -21,6 +21,8 @@ export type SearchFilters = {
   q: string | null;
   maxTime: number | null;
   tags: string[];
+  // null=すべて / true=作ったことある / false=まだ料理してない
+  cooked: boolean | null;
   sort: SortKey;
 };
 
@@ -109,12 +111,17 @@ export function parseSearchParams(sp: RawSearchParams): SearchFilters {
     }
   }
 
+  // cooked: "yes"→true / "no"→false / それ以外・未指定→null（すべて）。
+  const rawCooked = firstValue(sp.cooked);
+  const cooked: boolean | null =
+    rawCooked === "yes" ? true : rawCooked === "no" ? false : null;
+
   // sort: 許可値のみ採用。空/不正は "default"（サーバの updated_at desc 維持）。
   const rawSort = firstValue(sp.sort);
   const sort: SortKey =
     rawSort === "kana" || rawSort === "time" ? rawSort : "default";
 
-  return { q, maxTime, tags, sort };
+  return { q, maxTime, tags, cooked, sort };
 }
 
 /**

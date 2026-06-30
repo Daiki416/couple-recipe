@@ -39,6 +39,7 @@ type ParsedRecipe = {
     source_url: string | null;
     servings: number | null;
     cooking_time_minutes: number | null;
+    is_cooked: boolean;
   };
   ingredients: { name: string; quantity: string | null }[];
   steps: { body: string }[];
@@ -251,6 +252,9 @@ function parseRecipeForm(formData: FormData): ParseRecipeFormResult {
         source_url: sourceUrl === "" ? null : sourceUrl,
         servings: servingsResult.value,
         cooking_time_minutes: cookingTimeResult.value,
+        // チェックボックスは未チェック時に name 自体が送られないため、値ではなく
+        // キーの有無で真偽を判定する（"on" などの値に依存しない）。
+        is_cooked: formData.get("is_cooked") != null,
       },
       ingredients,
       steps,
@@ -536,4 +540,32 @@ export async function deleteRecipe(formData: FormData) {
 
   revalidatePath("/recipes");
   redirect("/recipes");
+}
+
+/**
+ * 一覧のインライントグル用 Server Action。
+ * 「作ったことがある」フラグ（is_cooked）を切り替える。
+ * RLS により自世帯のレシピのみ更新でき、エラーはサーバログのみに記録する
+ * （ユーザーには出さない・redirect しない）。
+ */
+export async function toggleCooked(formData: FormData) {
+  const id = String(formData.get("recipe_id") ?? "").trim();
+  // hidden 由来で改ざんされ得るため UUID 形式のみ受け付ける（不正値は無視）。
+  if (!UUID_RE.test(id)) {
+    return;
+  }
+  const next = String(formData.get("next") ?? "") === "1";
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("recipes")
+    .update({ is_cooked: next })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[toggleCooked]", error);
+    return;
+  }
+
+  revalidatePath("/recipes");
 }

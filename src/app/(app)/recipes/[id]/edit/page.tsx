@@ -63,6 +63,7 @@ export default async function EditRecipePage({
       recipe.cooking_time_minutes !== null
         ? String(recipe.cooking_time_minutes)
         : "",
+    is_cooked: recipe.is_cooked,
     ingredients: recipe.ingredients.map((ingredient) => ({
       name: ingredient.name,
       quantity: ingredient.quantity ?? "",
