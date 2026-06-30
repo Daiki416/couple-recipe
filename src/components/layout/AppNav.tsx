@@ -12,6 +12,8 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/recipes", label: "レシピ一覧" },
   { href: "/recipes/new", label: "新規作成" },
+  { href: "/chat", label: "AI に相談" },
+  { href: "/suggestions", label: "AIの提案" },
   { href: "/settings", label: "設定" },
 ];
 

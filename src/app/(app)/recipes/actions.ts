@@ -23,6 +23,10 @@ const TAG_MAX_COUNT = 20;
 const COOKING_TIME_MIN = 1;
 const COOKING_TIME_MAX = 1440;
 
+// recipe_suggestions.id（UUID v4）の形式。採用時の削除対象を検証する。
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** parseRecipeForm の整形済みデータ。RPC の jsonb 引数にそのまま渡せる形。 */
 type ParsedRecipe = {
   recipe: {
@@ -263,6 +267,23 @@ export async function createRecipe(
     // 詳細はサーバログのみに記録し、ユーザーには汎用文言を返す。
     console.error("[createRecipe]", error);
     return { error: "レシピの保存に失敗しました。時間をおいて再度お試しください。" };
+  }
+
+  // AI 提案から採用した場合は、元の提案を削除する（best-effort・RLS スコープ）。
+  // 失敗してもレシピ作成は成功扱いとし、詳細はサーバログのみに記録する。
+  // suggestion_id は hidden input 由来で改ざんされ得るため、UUID 形式のみ受け付ける
+  // （不正値は無視。DB エラーとログ汚染を防ぐ）。
+  const suggestionId = String(formData.get("suggestion_id") ?? "").trim();
+  if (UUID_RE.test(suggestionId)) {
+    const { error: deleteError } = await supabase
+      .from("recipe_suggestions")
+      .delete()
+      .eq("id", suggestionId);
+    if (deleteError) {
+      console.error("[createRecipe] delete suggestion", deleteError);
+    } else {
+      revalidatePath("/suggestions");
+    }
   }
 
   revalidatePath("/recipes");

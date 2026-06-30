@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       households: {
@@ -175,6 +150,48 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipe_suggestions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          draft: Json
+          household_id: string
+          id: string
+          source_prompt: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          draft: Json
+          household_id: string
+          id?: string
+          source_prompt?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          draft?: Json
+          household_id?: string
+          id?: string
+          source_prompt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_suggestions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_suggestions_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
             referencedColumns: ["id"]
           },
         ]
@@ -507,9 +524,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

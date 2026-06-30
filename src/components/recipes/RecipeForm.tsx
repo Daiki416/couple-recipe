@@ -28,6 +28,8 @@ type RecipeFormProps = {
   ) => Promise<RecipeFormState>;
   defaultValues?: RecipeFormValues;
   recipeId?: string;
+  /** AI 提案から流し込んだ場合の提案 id。作成成功後に元の提案を消すため hidden で送る。 */
+  suggestionId?: string;
   ingredientSuggestions?: string[];
   tagSuggestions?: string[];
 };
@@ -40,6 +42,7 @@ export function RecipeForm({
   action,
   defaultValues,
   recipeId,
+  suggestionId,
   ingredientSuggestions = [],
   tagSuggestions = [],
 }: RecipeFormProps) {
@@ -69,6 +72,9 @@ export function RecipeForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       {recipeId && <input type="hidden" name="id" value={recipeId} />}
+      {suggestionId && (
+        <input type="hidden" name="suggestion_id" value={suggestionId} />
+      )}
 
       {/* タイトル */}
       <div className="flex flex-col gap-1">

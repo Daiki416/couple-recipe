@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { RecipeFormState } from "@/app/(app)/recipes/actions";
 import { importRecipeFromUrl } from "@/app/(app)/recipes/import-actions";
 import { RecipeForm, type RecipeFormValues } from "@/components/recipes/RecipeForm";
+import { takeAiRecipeDraft, takeAiSuggestionId } from "@/lib/chat/draft-storage";
 import { inputClass, labelClass, primaryButtonClass } from "@/lib/ui";
 
 type NewRecipeWorkspaceProps = {
@@ -28,11 +29,36 @@ export function NewRecipeWorkspace({
   tagSuggestions = [],
 }: NewRecipeWorkspaceProps) {
   const [values, setValues] = useState<RecipeFormValues | undefined>(undefined);
+  const [suggestionId, setSuggestionId] = useState<string | undefined>(undefined);
   const [importSeq, setImportSeq] = useState(0);
   const [url, setUrl] = useState("");
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [message, setMessage] = useState<Message | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // AI チャットからの提案ドラフトがあれば初回表示で 1 回だけ流し込む。
+  // URL 取り込みと同じ key 切替方式で RecipeForm を再マウントする。
+  // sessionStorage はクライアント専用のため lazy 初期化だと SSR と不一致になる。
+  // マウント後に 1 度だけ読む正当な副作用なので set-state-in-effect を許可する。
+  useEffect(() => {
+    const draft = takeAiRecipeDraft();
+    if (!draft) {
+      return;
+    }
+    // AI の提案一覧から来た場合は提案 id も受け取り、作成成功時に元の提案を消す。
+    const sid = takeAiSuggestionId();
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setValues(draft);
+    if (sid) {
+      setSuggestionId(sid);
+    }
+    setImportSeq((n) => n + 1);
+    setMessage({
+      tone: "info",
+      text: "AI の提案を読み込みました。内容を確認して「作成する」で保存してください。",
+    });
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
 
   const handleImport = () => {
     setMessage(null);
@@ -41,10 +67,13 @@ export function NewRecipeWorkspace({
     startTransition(async () => {
       const result = await importRecipeFromUrl(url);
       if (!result.ok) {
+        // 失敗時はフォーム内容を変えないため、AI 提案との紐付け(suggestionId)も維持する。
         setMessage({ tone: "error", text: result.error });
         return;
       }
       setValues(result.data);
+      // 取り込み成功でフォームは URL 由来に置き換わるので、AI 提案の紐付けは外す。
+      setSuggestionId(undefined);
       setImageUrl(result.imageUrl);
       setImportSeq((n) => n + 1);
       setMessage({
@@ -115,6 +144,7 @@ export function NewRecipeWorkspace({
         key={importSeq}
         action={action}
         defaultValues={values}
+        suggestionId={suggestionId}
         ingredientSuggestions={ingredientSuggestions}
         tagSuggestions={tagSuggestions}
       />
