@@ -5,6 +5,20 @@
 - Supabase Storage
 - 将来 S3 へ差し替え可能
 
+### バケット `recipe-images`（private）
+
+- レシピのメイン写真（1 枚）を保存する private バケット（`public=false`）。
+  表示は署名 URL（`createSignedUrl`）で行い、直接公開はしない。
+- 行メタは既存テーブル `recipe_images`（`position=0` の 1 行）を流用し、
+  `recipes` へのカラム追加はしない。
+- パス規約: `{household_id}/{recipe_id}/{uuid}.{ext}`。
+  先頭フォルダ = 世帯 ID で所有判定する。
+- `storage.objects` の RLS は `select` / `insert` / `update` / `delete` の 4 本
+  （`to authenticated`）。条件は
+  `bucket_id = 'recipe-images' and (storage.foldername(name))[1] = current_household_id()::text`。
+  世帯判定は `current_household_id()`（SECURITY DEFINER ヘルパ）を使い自己参照しない。
+- マイグレーション: `supabase/migrations/20260630020000_recipe_images_storage.sql`。
+
 ## AI
 
 - `src/lib/ai.ts` を経由する

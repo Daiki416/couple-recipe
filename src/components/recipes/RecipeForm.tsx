@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { RecipeFormState } from "@/app/(app)/recipes/actions";
+import { RecipeImageField } from "@/components/recipes/RecipeImageField";
 import {
   inputClass,
   labelClass,
@@ -30,6 +31,8 @@ type RecipeFormProps = {
   recipeId?: string;
   /** AI 提案から流し込んだ場合の提案 id。作成成功後に元の提案を消すため hidden で送る。 */
   suggestionId?: string;
+  /** 編集時の既存メイン画像の署名 URL。 */
+  defaultImageUrl?: string;
   ingredientSuggestions?: string[];
   tagSuggestions?: string[];
 };
@@ -43,6 +46,7 @@ export function RecipeForm({
   defaultValues,
   recipeId,
   suggestionId,
+  defaultImageUrl,
   ingredientSuggestions = [],
   tagSuggestions = [],
 }: RecipeFormProps) {
@@ -91,6 +95,9 @@ export function RecipeForm({
           className={inputClassName}
         />
       </div>
+
+      {/* 写真（メイン1枚） */}
+      <RecipeImageField defaultImageUrl={defaultImageUrl} />
 
       {/* 説明 */}
       <div className="flex flex-col gap-1">

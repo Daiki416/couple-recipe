@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createRecipeImageStorage } from "@/lib/storage.supabase";
 import { DeleteRecipeButton } from "@/components/recipes/DeleteRecipeButton";
 import { outlineButtonClass, pillClass } from "@/lib/ui";
 
@@ -29,7 +30,9 @@ export default async function RecipeDetailPage({
 
   const { data: recipe } = await supabase
     .from("recipes")
-    .select("*, ingredients(*), recipe_steps(*), recipe_tags(tags(name))")
+    .select(
+      "*, ingredients(*), recipe_steps(*), recipe_tags(tags(name)), recipe_images(storage_path, position)",
+    )
     .eq("id", id)
     .order("position", { referencedTable: "ingredients", ascending: true })
     .order("position", { referencedTable: "recipe_steps", ascending: true })
@@ -37,6 +40,19 @@ export default async function RecipeDetailPage({
 
   if (!recipe) {
     notFound();
+  }
+
+  // メイン画像（position=0）があれば署名 URL を生成する（best-effort）。
+  const imagePath =
+    recipe.recipe_images.find((img) => img.position === 0)?.storage_path ??
+    null;
+  let imageUrl: string | null = null;
+  if (imagePath) {
+    try {
+      imageUrl = await createRecipeImageStorage(supabase).getUrl(imagePath);
+    } catch (error) {
+      console.error("[RecipeDetailPage] signed url", error);
+    }
   }
 
   const sourceUrl = recipe.source_url ? safeHttpUrl(recipe.source_url) : null;
@@ -60,6 +76,16 @@ export default async function RecipeDetailPage({
           <DeleteRecipeButton recipeId={recipe.id} />
         </div>
       </div>
+
+      {imageUrl && (
+        // private 画像のため next/image ではなく素の img を使う。
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt={recipe.title}
+          className="mb-6 w-full rounded-xl border-2 border-line object-cover"
+        />
+      )}
 
       <dl className="mb-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-ink-soft">
         {recipe.servings !== null && (

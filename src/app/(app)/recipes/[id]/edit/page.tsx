@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createRecipeImageStorage } from "@/lib/storage.supabase";
 import { updateRecipe } from "@/app/(app)/recipes/actions";
 import {
   RecipeForm,
@@ -17,7 +18,9 @@ export default async function EditRecipePage({
 
   const { data: recipe } = await supabase
     .from("recipes")
-    .select("*, ingredients(*), recipe_steps(*), recipe_tags(tags(name))")
+    .select(
+      "*, ingredients(*), recipe_steps(*), recipe_tags(tags(name)), recipe_images(storage_path, position)",
+    )
     .eq("id", id)
     .order("position", { referencedTable: "ingredients", ascending: true })
     .order("position", { referencedTable: "recipe_steps", ascending: true })
@@ -25,6 +28,21 @@ export default async function EditRecipePage({
 
   if (!recipe) {
     notFound();
+  }
+
+  // 既存メイン画像（position=0）の署名 URL（best-effort）。
+  const imagePath =
+    recipe.recipe_images.find((img) => img.position === 0)?.storage_path ??
+    null;
+  let defaultImageUrl: string | undefined;
+  if (imagePath) {
+    try {
+      defaultImageUrl = await createRecipeImageStorage(supabase).getUrl(
+        imagePath,
+      );
+    } catch (error) {
+      console.error("[EditRecipePage] signed url", error);
+    }
   }
 
   const { data: ing } = await supabase.from("ingredients").select("name");
@@ -69,6 +87,7 @@ export default async function EditRecipePage({
         action={updateRecipe}
         defaultValues={defaultValues}
         recipeId={recipe.id}
+        defaultImageUrl={defaultImageUrl}
         ingredientSuggestions={ingredientSuggestions}
         tagSuggestions={tagSuggestions}
       />

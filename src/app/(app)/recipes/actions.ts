@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { codePointLength, hasControlChar } from "@/lib/validation/text";
+import { createRecipeImageStorage } from "@/lib/storage.supabase";
+import { validateImageFile } from "@/lib/recipe-image";
 
 export type RecipeFormState = {
   error: string;
@@ -242,6 +244,136 @@ function parseRecipeForm(formData: FormData): ParseRecipeFormResult {
   };
 }
 
+type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
+
+/**
+ * FormData の image を取り出す。未指定 / 空 File（size 0）は null。
+ * 「画像なし」と「空送信」を区別するため size 0 を弾く。
+ */
+function getUploadFile(formData: FormData): File | null {
+  const value = formData.get("image");
+  if (!(value instanceof File) || value.size === 0) {
+    return null;
+  }
+  return value;
+}
+
+/** 既存メイン画像の特定削除に使う最小情報（id で確実に行を特定する）。 */
+type MainImageRef = { id: string; storage_path: string };
+
+/**
+ * レシピにメイン画像（position=0）を保存する（best-effort）。
+ * 検証 NG / Storage / DB 失敗時はサーバログのみで、レシピ処理は継続する。
+ * 戻り値は「行の挿入まで完全に成功したか」。差し替え時に旧画像を消すかの判断に使う。
+ */
+async function saveRecipeImage(
+  supabase: ServerSupabase,
+  recipeId: string,
+  file: File,
+): Promise<boolean> {
+  const validation = validateImageFile(file);
+  if (!validation.ok) {
+    console.error("[saveRecipeImage] invalid file", validation.reason);
+    return false;
+  }
+
+  const { data: householdId, error: householdError } = await supabase.rpc(
+    "current_household_id",
+  );
+  if (householdError || !householdId) {
+    console.error("[saveRecipeImage] household", householdError);
+    return false;
+  }
+
+  const path = `${householdId}/${recipeId}/${crypto.randomUUID()}.${validation.ext}`;
+  const storage = createRecipeImageStorage(supabase);
+  try {
+    await storage.upload(file, path);
+  } catch (error) {
+    console.error("[saveRecipeImage] upload", error);
+    return false;
+  }
+
+  const { error: insertError } = await supabase
+    .from("recipe_images")
+    .insert({ recipe_id: recipeId, storage_path: path, position: 0 });
+  if (insertError) {
+    console.error("[saveRecipeImage] insert", insertError);
+    // 行が作れなかった場合は orphan を残さないよう掃除する（best-effort）。
+    try {
+      await storage.remove(path);
+    } catch (cleanupError) {
+      console.error("[saveRecipeImage] cleanup", cleanupError);
+    }
+    return false;
+  }
+  return true;
+}
+
+/**
+ * レシピの既存メイン画像（position=0）を控える（差し替え時の旧画像削除に使う）。
+ * 取得失敗時は空配列を返し、旧画像には触れない（既存写真を維持する）。
+ */
+async function fetchMainImages(
+  supabase: ServerSupabase,
+  recipeId: string,
+): Promise<MainImageRef[]> {
+  const { data, error } = await supabase
+    .from("recipe_images")
+    .select("id, storage_path")
+    .eq("recipe_id", recipeId)
+    .eq("position", 0);
+  if (error) {
+    console.error("[fetchMainImages] select", error);
+    return [];
+  }
+  return data ?? [];
+}
+
+/**
+ * 控えておいたメイン画像を Storage と行から削除する（best-effort）。
+ * 行は id で特定して消す（position=0 一括ではなく旧行のみを確実に削除する）。
+ */
+async function deleteMainImages(
+  supabase: ServerSupabase,
+  images: MainImageRef[],
+): Promise<void> {
+  if (images.length === 0) {
+    return;
+  }
+
+  const storage = createRecipeImageStorage(supabase);
+  for (const image of images) {
+    try {
+      await storage.remove(image.storage_path);
+    } catch (storageError) {
+      console.error("[deleteMainImages] storage", storageError);
+    }
+  }
+
+  const { error: deleteError } = await supabase
+    .from("recipe_images")
+    .delete()
+    .in(
+      "id",
+      images.map((image) => image.id),
+    );
+  if (deleteError) {
+    console.error("[deleteMainImages] delete", deleteError);
+  }
+}
+
+/**
+ * レシピの既存メイン画像（position=0）を Storage と行から削除する（best-effort）。
+ * remove_image=1（削除のみ）のパスで使う。
+ */
+async function removeRecipeImage(
+  supabase: ServerSupabase,
+  recipeId: string,
+): Promise<void> {
+  await deleteMainImages(supabase, await fetchMainImages(supabase, recipeId));
+}
+
 /**
  * レシピを新規作成する Server Action。
  * 成功時は詳細ページへ redirect する。
@@ -286,6 +418,12 @@ export async function createRecipe(
     }
   }
 
+  // メイン画像があれば保存（best-effort・失敗してもレシピ作成は成功扱い）。
+  const imageFile = getUploadFile(formData);
+  if (imageFile) {
+    await saveRecipeImage(supabase, String(data), imageFile);
+  }
+
   revalidatePath("/recipes");
   // redirect は内部で例外を投げるため try/catch の外で呼ぶ。
   redirect(`/recipes/${data}`);
@@ -323,6 +461,23 @@ export async function updateRecipe(
     return { error: "レシピの保存に失敗しました。時間をおいて再度お試しください。" };
   }
 
+  // 画像の差し替え / 削除（best-effort）。
+  // 差し替え時は、新画像が「検証→アップロード→行挿入」まで完全に成功してから
+  // 旧画像を削除する。途中で失敗したら旧画像には一切触れず、既存の正常な写真を
+  // 維持する（新旧の position=0 が一瞬併存しても、旧行は id で特定削除する）。
+  // 新画像が無く remove_image=1 のときは単純に既存画像を削除する。
+  const imageFile = getUploadFile(formData);
+  const removeImage = String(formData.get("remove_image") ?? "") === "1";
+  if (imageFile) {
+    const previousImages = await fetchMainImages(supabase, id);
+    const saved = await saveRecipeImage(supabase, id, imageFile);
+    if (saved) {
+      await deleteMainImages(supabase, previousImages);
+    }
+  } else if (removeImage) {
+    await removeRecipeImage(supabase, id);
+  }
+
   revalidatePath("/recipes");
   revalidatePath(`/recipes/${id}`);
   redirect(`/recipes/${id}`);
@@ -339,6 +494,24 @@ export async function deleteRecipe(formData: FormData) {
   }
 
   const supabase = await createClient();
+
+  // レシピ削除前に Storage の画像を掃除する（行は cascade で消える）。
+  // 掃除に失敗してもレシピ削除は続行する（best-effort）。
+  const { data: imageRows } = await supabase
+    .from("recipe_images")
+    .select("storage_path")
+    .eq("recipe_id", id);
+  if (imageRows && imageRows.length > 0) {
+    const storage = createRecipeImageStorage(supabase);
+    for (const row of imageRows) {
+      try {
+        await storage.remove(row.storage_path);
+      } catch (storageError) {
+        console.error("[deleteRecipe] storage", storageError);
+      }
+    }
+  }
+
   const { error } = await supabase.from("recipes").delete().eq("id", id);
 
   if (error) {

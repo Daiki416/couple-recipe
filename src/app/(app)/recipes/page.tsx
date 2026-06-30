@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createRecipeImageStorage } from "@/lib/storage.supabase";
 import {
   parseSearchParams,
   sortRecipes,
@@ -42,6 +43,37 @@ export default async function RecipesPage({
   // クライアント指定の並び替えを適用（非破壊。default はサーバ順を維持）。
   const sorted = recipes ? sortRecipes(recipes, filters.sort) : recipes;
 
+  // 一覧サムネ用に、各レシピのメイン画像（position=0）の署名 URL を一括生成する（N+1 回避）。
+  const imageUrlByRecipe = new Map<string, string>();
+  if (sorted && sorted.length > 0) {
+    const { data: imageRows, error: imageError } = await supabase
+      .from("recipe_images")
+      .select("recipe_id, storage_path")
+      .eq("position", 0)
+      .in(
+        "recipe_id",
+        sorted.map((r) => r.id),
+      );
+    if (imageError) {
+      console.error("[RecipesPage] recipe_images", imageError);
+    } else if (imageRows && imageRows.length > 0) {
+      try {
+        const storage = createRecipeImageStorage(supabase);
+        const signed = await storage.getUrls(
+          imageRows.map((row) => row.storage_path),
+        );
+        for (const row of imageRows) {
+          const url = signed.get(row.storage_path);
+          if (url) {
+            imageUrlByRecipe.set(row.recipe_id, url);
+          }
+        }
+      } catch (signError) {
+        console.error("[RecipesPage] signed urls", signError);
+      }
+    }
+  }
+
   const tagSuggestions = (tg ?? []).map((r) => r.name);
 
   // キーワード欄のサジェスト（自世帯のレシピ名＋食材名、重複除去）
@@ -82,40 +114,61 @@ export default async function RecipesPage({
         </p>
       ) : (
         <ul className={`${cardClass} divide-y-2 divide-line`}>
-          {sorted.map((recipe) => (
-            <li key={recipe.id} className="px-4 py-3">
-              <Link
-                href={`/recipes/${recipe.id}`}
-                className="group flex items-baseline gap-2"
-              >
-                <span className="min-w-0 font-round font-bold transition-colors group-hover:text-tomato">
-                  {recipe.title}
-                </span>
-                {recipe.cooking_time_minutes !== null && (
-                  <>
-                    <span className="menu-leader" aria-hidden />
-                    <span className="shrink-0 font-bold text-mustard">
-                      {recipe.cooking_time_minutes}
-                      <span className="text-xs">分</span>
-                    </span>
-                  </>
+          {sorted.map((recipe) => {
+            const thumbUrl = imageUrlByRecipe.get(recipe.id);
+            return (
+              <li key={recipe.id} className="flex gap-3 px-4 py-3">
+                {thumbUrl && (
+                  <Link
+                    href={`/recipes/${recipe.id}`}
+                    className="shrink-0"
+                    aria-hidden
+                    tabIndex={-1}
+                  >
+                    {/* private 画像のため next/image ではなく素の img を使う。 */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={thumbUrl}
+                      alt=""
+                      className="size-14 rounded-lg border-2 border-line object-cover"
+                    />
+                  </Link>
                 )}
-              </Link>
-              {recipe.tags.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {recipe.tags.map((name) => (
-                    <Link
-                      key={name}
-                      href={`/recipes?tag=${encodeURIComponent(name)}`}
-                      className={pillClass}
-                    >
-                      {name}
-                    </Link>
-                  ))}
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/recipes/${recipe.id}`}
+                    className="group flex items-baseline gap-2"
+                  >
+                    <span className="min-w-0 font-round font-bold transition-colors group-hover:text-tomato">
+                      {recipe.title}
+                    </span>
+                    {recipe.cooking_time_minutes !== null && (
+                      <>
+                        <span className="menu-leader" aria-hidden />
+                        <span className="shrink-0 font-bold text-mustard">
+                          {recipe.cooking_time_minutes}
+                          <span className="text-xs">分</span>
+                        </span>
+                      </>
+                    )}
+                  </Link>
+                  {recipe.tags.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {recipe.tags.map((name) => (
+                        <Link
+                          key={name}
+                          href={`/recipes?tag=${encodeURIComponent(name)}`}
+                          className={pillClass}
+                        >
+                          {name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>
