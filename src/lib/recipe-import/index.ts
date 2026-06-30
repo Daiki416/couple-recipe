@@ -2,6 +2,8 @@ import "server-only";
 import type { ImportedRecipe } from "./types";
 import { extractFromHtml } from "./generic";
 import { safeFetchText } from "./http";
+import { fetchInstagramRecipe } from "./instagram";
+import { isInstagramHost } from "./instagram-url";
 import { fetchYoutubeRecipe } from "./youtube";
 import { isYoutubeHost } from "./youtube-url";
 
@@ -13,6 +15,9 @@ export async function runImport(rawUrl: string): Promise<ImportedRecipe> {
   const url = new URL(rawUrl);
   if (isYoutubeHost(url.hostname)) {
     return fetchYoutubeRecipe(rawUrl);
+  }
+  if (isInstagramHost(url.hostname)) {
+    return fetchInstagramRecipe(rawUrl);
   }
   const html = await safeFetchText(rawUrl);
   return extractFromHtml(html, rawUrl);

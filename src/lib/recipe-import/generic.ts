@@ -31,7 +31,7 @@ function readAttr(tag: string, name: string): string | undefined {
 }
 
 /** meta タグを property/name → content のマップとして収集する。 */
-function collectMeta(html: string): Map<string, string> {
+export function collectMeta(html: string): Map<string, string> {
   const meta = new Map<string, string>();
   for (const m of html.matchAll(/<meta\b[^>]*>/gi)) {
     const tag = m[0];
