@@ -12,7 +12,7 @@ export function Logo({ className }: LogoProps) {
   return (
     <Link
       href="/recipes"
-      className={`inline-flex items-center gap-2 font-display text-tomato ${className ?? ""}`}
+      className={`inline-flex items-center gap-2 whitespace-nowrap font-display text-tomato ${className ?? ""}`}
     >
       <span
         className="inline-block h-5 w-5 rounded-full border-2 border-ink gingham"
