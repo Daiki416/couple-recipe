@@ -11,15 +11,17 @@ import { cardClass } from "@/lib/ui";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // middleware が getUser で JWT を検証・リフレッシュ済みのため、
+  // 読み取りは getClaims で十分（sub=user id、email も検証済みの値）。
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims ?? null;
+  const userId = claims?.sub ?? null;
 
-  const { data: profile } = user
+  const { data: profile } = userId
     ? await supabase
         .from("profiles")
         .select("display_name, household_id")
-        .eq("id", user.id)
+        .eq("id", userId)
         .maybeSingle()
     : { data: null };
 
@@ -38,7 +40,7 @@ export default async function SettingsPage() {
       <div className="flex flex-col gap-5">
         <DisplayNameForm defaultName={profile?.display_name ?? ""} />
         <HouseholdForm defaultName={household?.name ?? ""} />
-        <EmailForm currentEmail={user?.email ?? ""} />
+        <EmailForm currentEmail={claims?.email ?? ""} />
         <PasswordForm />
 
         <section className={`${cardClass} p-5`}>

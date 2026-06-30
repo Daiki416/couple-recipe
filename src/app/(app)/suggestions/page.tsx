@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { deleteSuggestion } from "@/app/(app)/suggestions/actions";
 import { SuggestionCard } from "@/components/suggestions/SuggestionCard";
 import { normalizeDraft } from "@/lib/chat/normalize";
 import { createClient } from "@/lib/supabase/server";
+import { subButtonClass } from "@/lib/ui";
 
 export default async function SuggestionsPage() {
   const supabase = await createClient();
@@ -26,11 +28,16 @@ export default async function SuggestionsPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
-      <div className="mb-6">
-        <h1 className="font-round text-2xl font-bold text-ink">AIの提案</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          AI が考えた新しいレシピの控えです。気に入ったら「レシピにする」で登録できます。
-        </p>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-round text-2xl font-bold text-ink">AIの提案</h1>
+          <p className="mt-1 text-sm text-ink-soft">
+            AI が考えた新しいレシピの控えです。気に入ったら「レシピにする」で登録できます。
+          </p>
+        </div>
+        <Link href="/chat" className={subButtonClass}>
+          AI に相談する
+        </Link>
       </div>
 
       {suggestions.length === 0 ? (

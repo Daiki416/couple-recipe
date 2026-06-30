@@ -7,15 +7,20 @@ import { Logo } from "@/components/layout/Logo";
 type NavItem = {
   href: string;
   label: string;
+  /** スマホ下部タブバーにも出すか（PC サイドバーには全項目を出す）。 */
+  bottomBar: boolean;
 };
 
+// 「AIの提案」(/suggestions) は chat 画面からの導線で到達するため、ナビからは外す。
 const navItems: NavItem[] = [
-  { href: "/recipes", label: "レシピ一覧" },
-  { href: "/recipes/new", label: "新規作成" },
-  { href: "/chat", label: "AI に相談" },
-  { href: "/suggestions", label: "AIの提案" },
-  { href: "/settings", label: "設定" },
+  { href: "/recipes", label: "レシピ一覧", bottomBar: true },
+  { href: "/recipes/new", label: "新規作成", bottomBar: true },
+  { href: "/chat", label: "AI に相談", bottomBar: true },
+  { href: "/settings", label: "設定", bottomBar: false },
 ];
+
+// スマホは画面が狭いため、設定を除いた 3 項目だけを下部タブバーに並べる。
+const bottomNavItems = navItems.filter((item) => item.bottomBar);
 
 /**
  * 現在のパスがナビ項目のアクティブ対象かどうかを判定する。
@@ -58,7 +63,7 @@ export function AppNav() {
 
       {/* スマホ: 下部タブバー */}
       <nav className="fixed bottom-0 left-0 right-0 z-10 flex border-t-2 border-line bg-paper md:hidden">
-        {navItems.map((item) => (
+        {bottomNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
