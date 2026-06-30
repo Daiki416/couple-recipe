@@ -237,6 +237,7 @@ export type Database = {
           id: string
           is_favorite: boolean
           last_cooked_at: string | null
+          note: string | null
           rating: number | null
           servings: number | null
           source_url: string | null
@@ -253,6 +254,7 @@ export type Database = {
           id?: string
           is_favorite?: boolean
           last_cooked_at?: string | null
+          note?: string | null
           rating?: number | null
           servings?: number | null
           source_url?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           id?: string
           is_favorite?: boolean
           last_cooked_at?: string | null
+          note?: string | null
           rating?: number | null
           servings?: number | null
           source_url?: string | null

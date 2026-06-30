@@ -14,6 +14,7 @@ import {
 export type RecipeFormValues = {
   title: string;
   description: string;
+  note: string;
   source_url: string;
   servings: string;
   cooking_time_minutes: string;
@@ -110,6 +111,22 @@ export function RecipeForm({
           rows={3}
           maxLength={2000}
           defaultValue={defaultValues?.description ?? ""}
+          className={inputClassName}
+        />
+      </div>
+
+      {/* メモ */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="note" className={labelClass}>
+          メモ
+        </label>
+        <textarea
+          id="note"
+          name="note"
+          rows={3}
+          maxLength={2000}
+          placeholder="好みで〜を追加しても良い、などの覚え書き"
+          defaultValue={defaultValues?.note ?? ""}
           className={inputClassName}
         />
       </div>

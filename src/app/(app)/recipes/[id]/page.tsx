@@ -138,6 +138,13 @@ export default async function RecipeDetailPage({
         </p>
       )}
 
+      {recipe.note && (
+        <section className="mb-8">
+          <h2 className="mb-2 font-round text-lg font-bold text-ink">メモ</h2>
+          <p className="whitespace-pre-wrap text-base">{recipe.note}</p>
+        </section>
+      )}
+
       <section className="mb-8">
         <h2 className="mb-2 font-round text-lg font-bold text-ink">材料</h2>
         {recipe.ingredients.length === 0 ? (

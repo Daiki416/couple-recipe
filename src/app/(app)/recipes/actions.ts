@@ -14,6 +14,7 @@ export type RecipeFormState = {
 // 入力長の上限（コードポイント単位）
 const TITLE_MAX = 100;
 const DESCRIPTION_MAX = 2000;
+const NOTE_MAX = 2000;
 const SOURCE_URL_MAX = 2000;
 const INGREDIENT_NAME_MAX = 100;
 const INGREDIENT_QUANTITY_MAX = 100;
@@ -34,6 +35,7 @@ type ParsedRecipe = {
   recipe: {
     title: string;
     description: string | null;
+    note: string | null;
     source_url: string | null;
     servings: number | null;
     cooking_time_minutes: number | null;
@@ -98,6 +100,18 @@ function parseRecipeForm(formData: FormData): ParseRecipeFormResult {
     return {
       ok: false,
       error: `説明は${DESCRIPTION_MAX}文字以内で入力してください。`,
+    };
+  }
+
+  // note（メモ）: 任意・最大長・改行/タブのみ許可（description と同じ作法）
+  const note = String(formData.get("note") ?? "");
+  if (
+    codePointLength(note) > NOTE_MAX ||
+    hasControlChar(note, { allowNewlineTab: true })
+  ) {
+    return {
+      ok: false,
+      error: `メモは${NOTE_MAX}文字以内で入力してください。`,
     };
   }
 
@@ -233,6 +247,7 @@ function parseRecipeForm(formData: FormData): ParseRecipeFormResult {
       recipe: {
         title,
         description: description.trim() === "" ? null : description,
+        note: note.trim() === "" ? null : note,
         source_url: sourceUrl === "" ? null : sourceUrl,
         servings: servingsResult.value,
         cooking_time_minutes: cookingTimeResult.value,

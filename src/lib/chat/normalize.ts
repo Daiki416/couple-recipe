@@ -125,6 +125,8 @@ export function normalizeDraft(raw: unknown): RecipeFormValues {
   return {
     title: clampText(asString(draft.title), LIMITS.TITLE),
     description: clampText(asString(draft.description), LIMITS.DESCRIPTION),
+    // メモは AI ドラフトから反映しない（常に空）。
+    note: "",
     source_url: "",
     servings: clampNumberField(draft.servings, 1, 99),
     cooking_time_minutes: clampNumberField(draft.cooking_time_minutes, 1, 1440),

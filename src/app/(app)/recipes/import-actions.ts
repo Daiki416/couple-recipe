@@ -38,6 +38,8 @@ function toFormValues(imported: ImportedRecipe, sourceUrl: string): RecipeFormVa
     description: imported.description
       ? clampText(imported.description, LIMITS.DESCRIPTION)
       : "",
+    // メモは取り込み元から反映しない（常に空）。
+    note: "",
     source_url: clampText(sourceUrl, LIMITS.SOURCE_URL),
     servings: clampNumberField(imported.servings, 1, 99),
     cooking_time_minutes: clampNumberField(imported.cookingTimeMinutes, 1, 1440),

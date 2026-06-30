@@ -56,6 +56,7 @@ export default async function EditRecipePage({
   const defaultValues: RecipeFormValues = {
     title: recipe.title,
     description: recipe.description ?? "",
+    note: recipe.note ?? "",
     source_url: recipe.source_url ?? "",
     servings: recipe.servings !== null ? String(recipe.servings) : "",
     cooking_time_minutes:
