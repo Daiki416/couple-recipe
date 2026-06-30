@@ -115,22 +115,6 @@ export function RecipeForm({
         />
       </div>
 
-      {/* メモ */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="note" className={labelClass}>
-          メモ
-        </label>
-        <textarea
-          id="note"
-          name="note"
-          rows={3}
-          maxLength={2000}
-          placeholder="好みで〜を追加しても良い、などの覚え書き"
-          defaultValue={defaultValues?.note ?? ""}
-          className={inputClassName}
-        />
-      </div>
-
       {/* 出典 URL */}
       <div className="flex flex-col gap-1">
         <label htmlFor="source_url" className={labelClass}>
@@ -349,6 +333,22 @@ export function RecipeForm({
           <option key={name} value={name} />
         ))}
       </datalist>
+
+      {/* メモ */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="note" className={labelClass}>
+          メモ
+        </label>
+        <textarea
+          id="note"
+          name="note"
+          rows={3}
+          maxLength={2000}
+          placeholder="好みで〜を追加しても良い、などの覚え書き"
+          defaultValue={defaultValues?.note ?? ""}
+          className={inputClassName}
+        />
+      </div>
 
       {state?.error && (
         <p className="text-sm font-bold text-tomato" role="alert">
