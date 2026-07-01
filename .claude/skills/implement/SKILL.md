@@ -26,7 +26,11 @@ $ARGUMENTS
 ### Phase 2: レビュー（codex-review → validator 精査）
 1. `mcp__codex-review__review_current_diff` を実行する（旧 `reviewer` サブエージェントは使わない）
    - `repo_path`: リポジトリのルート（このプロジェクトでは `/Users/daikisaito/dev/recipe_mng`）
-   - `doc_paths`: 正確性レビューのため関連ドキュメントを渡す（例 `["CLAUDE.md", "docs/architecture.md", "docs/database.md", "docs/project.md"]`）
+   - `doc_paths`: 毎回固定では渡さない。変更内容から必要と判断した場合のみ、関連ドキュメントを最小限渡す
+      - 原則: 軽微なUI修正・文言修正・局所的なリファクタは `doc_paths` なし
+      - 渡す場合: 要件・設計・DB・認証・RLS・権限・データ構造・API契約に関わる変更
+      - 例: `["CLAUDE.md"]`、`["docs/database.md"]`、`["docs/architecture.md", "docs/database.md"]`
+      - 判断に迷う場合は、少ない方を選ぶ
    - MCPサーバーでgit diff を取得するため、Claude 側で diff 本文を渡さない（トークン節約）
    - ユーザーから「プロジェクト全体をレビュー」等の明確な指示があるときのみ `mcp__codex-review__review_whole_project` を使う
 2. `reviewer-validator` を実行し、codex-review の指摘を精査させる（維持・降格・却下／重要度調整）
